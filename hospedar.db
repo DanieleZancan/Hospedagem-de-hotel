@@ -1,0 +1,305 @@
+CREATE SCHEMA hospedar_db;
+USE hospedar_db;
+
+CREATE TABLE Hotel(
+  hotel_id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(80) NOT NULL,
+  cidade VARCHAR(20) NOT NULL,
+  uf VARCHAR(2) NOT NULL,
+  classificacao INT NOT NULL CHECK (classificacao BETWEEN 1 AND 5)
+  );
+  
+CREATE TABLE Quarto(
+  quarto_id INT AUTO_INCREMENT PRIMARY KEY,
+  hotel_id INT NOT NULL,
+  numero INT NOT NULL,
+  tipo VARCHAR(10) NOT NULL,
+  preco_diaria DECIMAL(5, 2) NOT NULL,
+  FOREIGN KEY (hotel_id) REFERENCES Hotel(hotel_id)
+);
+    
+CREATE TABLE Cliente(
+  cliente_id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(80) NOT NULL,
+  email VARCHAR(80) NOT NULL,
+  telefone VARCHAR(12) NOT NULL,
+  cpf VARCHAR(11) NOT NULL UNIQUE
+);
+      
+CREATE TABLE Hospedagem(
+  hospedagem_id INT AUTO_INCREMENT PRIMARY KEY,
+  cliente_id INT NOT NULL,
+  quarto_id INT NOT NULL,
+  dt_checkin DATE NOT NULL,
+  dt_checkout DATE NOT NULL,
+  valor_total_hosp FLOAT NOT NULL,
+  status_hosp VARCHAR(10) NOT NULL CHECK (status_hosp IN ('reserva', 'finalizada', 'hospedado', 'cancelada')),
+  FOREIGN KEY (cliente_id) REFERENCES Cliente(cliente_id),
+  FOREIGN KEY (quarto_id) REFERENCES Quarto(quarto_id)
+);
+        
+-- DROP TABLE Hospedagem;
+-- DROP TABLE Cliente;
+-- DROP TABLE Quarto;
+-- DROP TABLE Hotel;
+        
+INSERT INTO Hotel(nome, cidade, uf, classificacao) VALUES
+("Hotel Terracota", "Birigui", "SP", "5"),
+("Hotel Green", "Araçatuba", "SP", "4");
+
+INSERT INTO Quarto(hotel_id, numero, tipo, preco_diaria) VALUES
+(1, 101, "Standard", 200.00),
+(1, 102, "Suíte", 300.00),
+(1, 103, "Deluxe", 500.00),
+(1, 104, "Standard", 200.00),
+(1, 105, "Deluxe", 450.00),
+(2, 201, "Standard", 200.00),
+(2, 202, "Suíte", 300.00),
+(2, 203, "Standard", 200.00),
+(2, 204, "Suíte", 300.00),
+(2, 205, "Suíte", 300.00);
+
+INSERT INTO Cliente(nome, email, telefone, cpf) VALUES 
+("Ana Carolina", "anacarolina@gmail.com", "1899984759", "12345678900"),
+("Beatriz de Carvalho", "biadecarvalho@gmail.com", "1198765432", "00987654321"),
+("Carlos De Almeida", "carlosalmeida@hotmail.com", "1815975365", "98745612300");
+
+INSERT INTO Hospedagem(cliente_id, quarto_id, dt_checkin, dt_checkout, valor_total_hosp, status_hosp) VALUES
+(1, 1, '2024-01-01', '2024-01-05', 800.00, 'finalizada'),
+(1, 2, '2024-02-01', '2024-02-03', 600.00, 'finalizada'),
+(2, 6, '2024-01-10', '2024-01-15', 750.00, 'finalizada'),
+(2, 7, '2024-03-01', '2024-03-04', 750.00, 'finalizada'),
+(3, 3, '2024-01-15', '2024-01-20', 2500.00, 'finalizada'),
+(1, 4, '2024-04-01', '2024-04-05', 800.00, 'reserva'),
+(1, 5, '2024-05-01', '2024-05-03', 600.00, 'reserva'),
+(2, 8, '2024-04-10', '2024-04-15', 2250.00, 'reserva'),
+(2, 9, '2024-05-01', '2024-05-04', 450.00, 'reserva'),
+(3, 7, '2024-02-15', '2024-02-20', 1250.00, 'reserva'),
+(1, 1, '2024-01-20', '2024-01-22', 400.00, 'hospedado'),
+(1, 2, '2024-03-01', '2024-03-05', 1200.00, 'hospedado'),
+(2, 10, '2024-02-01', '2024-02-04', 750.00, 'hospedado'),
+(2, 8, '2024-04-01', '2024-04-10', 2250.00, 'hospedado'),
+(3, 1, '2024-02-15', '2024-02-20', 1000.00, 'hospedado'),
+(1, 4, '2024-01-25', '2024-01-27', 400.00, 'cancelada'),
+(1, 5, '2024-02-01', '2024-02-03', 600.00, 'cancelada'),
+(2, 6, '2024-01-25', '2024-01-28', 450.00, 'cancelada'),
+(2, 7, '2024-03-01', '2024-03-05', 1000.00, 'cancelada'),
+(3, 4, '2024-02-15', '2024-02-20', 1000.00, 'cancelada');
+
+SELECT h.nome AS hotel_nome, h.cidade, q.tipo, q.preco_diaria
+FROM Hotel h 
+JOIN Quarto q ON h.hotel_id = q.hotel_id;
+
+SELECT c.nome AS cliente_nome, h.nome AS hotel_nome, q.tipo AS quarto_tipo
+FROM Cliente c
+JOIN Hospedagem hs ON c.cliente_id = hs.cliente_id
+JOIN Quarto q ON hs.quarto_id = q.quarto_id
+JOIN Hotel h ON q.hotel_id = h.hotel_id
+WHERE hs.status_hosp = 'finalizada';
+
+SELECT h.nome AS hotel_nome, q.tipo AS quarto_tipo, hs.dt_checkin, hs.dt_checkout, hs.valor_total_hosp
+FROM Hospedagem hs
+JOIN Quarto q ON hs.quarto_id = q.quarto_id
+JOIN Hotel h ON q.hotel_id = h.hotel_id
+WHERE hs.cliente_id = 1  -- Substitua o ID do cliente conforme necessário
+ORDER BY hs.dt_checkin;
+
+SELECT c.nome, COUNT(hs.hospedagem_id) AS total_hospedagens
+FROM Cliente c
+JOIN Hospedagem hs ON c.cliente_id = hs.cliente_id
+GROUP BY c.cliente_id
+ORDER BY total_hospedagens DESC
+LIMIT 1;
+
+SELECT c.nome AS cliente_nome, h.nome AS hotel_nome, q.tipo AS quarto_tipo
+FROM Cliente c
+JOIN Hospedagem hs ON c.cliente_id = hs.cliente_id
+JOIN Quarto q ON hs.quarto_id = q.quarto_id
+JOIN Hotel h ON q.hotel_id = h.hotel_id
+WHERE hs.status_hosp = 'cancelada';
+
+SELECT h.nome AS hotel_nome, SUM(hs.valor_total_hosp) AS receita_total
+FROM Hotel h
+JOIN Quarto q ON h.hotel_id = q.hotel_id
+JOIN Hospedagem hs ON q.quarto_id = hs.quarto_id
+WHERE hs.status_hosp = 'finalizada'
+GROUP BY h.hotel_id
+ORDER BY receita_total DESC;
+
+SELECT DISTINCT c.nome AS cliente_nome
+FROM Cliente c
+JOIN Hospedagem hs ON c.cliente_id = hs.cliente_id
+JOIN Quarto q ON hs.quarto_id = q.quarto_id
+WHERE q.hotel_id
+
+SELECT c.nome AS cliente_nome, SUM(hs.valor_total_hosp) AS total_gasto
+FROM Cliente c
+JOIN Hospedagem hs ON c.cliente_id = hs.cliente_id
+WHERE hs.status_hosp = 'finalizada'
+GROUP BY c.cliente_id
+ORDER BY total_gasto DESC;
+
+SELECT q.quarto_id, q.tipo, q.preco_diaria
+FROM Quarto q
+LEFT JOIN Hospedagem hs ON q.quarto_id = hs.quarto_id
+WHERE hs.quarto_id IS NULL;
+
+SELECT q.tipo, AVG(q.preco_diaria) AS media_preco
+FROM Quarto q
+GROUP BY q.tipo;
+
+SHOW COLUMNS FROM Hospedagem LIKE 'checkin_realizado';
+SET SQL_SAFE_UPDATES = 0;
+UPDATE Hospedagem
+SET checkin_realizado = CASE
+    WHEN status_hosp IN ('finalizada', 'hospedado') THEN TRUE
+    ELSE FALSE
+END;
+
+ALTER TABLE Hotel
+DROP CONSTRAINT hotel_chk_1;
+
+ALTER TABLE Hotel
+CHANGE classificacao ratting INT;
+
+ALTER TABLE Hotel
+ADD CONSTRAINT hotel_chk_1 CHECK (ratting BETWEEN 1 AND 5);
+
+DELIMITER //
+
+CREATE PROCEDURE RegistrarCheckIn(IN p_hospedagem_id INT, IN p_data_checkin DATE)
+BEGIN
+    UPDATE Hospedagem
+    SET dt_checkin = p_data_checkin, status_hosp = 'hospedado'
+    WHERE hospedagem_id = p_hospedagem_id;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE CalcularTotalHospedagem(IN p_hospedagem_id INT)
+BEGIN
+    DECLARE v_preco_diaria DECIMAL(10, 2);
+    DECLARE v_dt_checkin DATE;
+    DECLARE v_dt_checkout DATE;
+    DECLARE v_dias INT;
+    
+    SELECT q.preco_diaria, hs.dt_checkin, hs.dt_checkout
+    INTO v_preco_diaria, v_dt_checkin, v_dt_checkout
+    FROM Hospedagem hs
+    JOIN Quarto q ON hs.quarto_id = q.quarto_id
+    WHERE hs.hospedagem_id = p_hospedagem_id;
+    
+    SET v_dias = DATEDIFF(v_dt_checkout, v_dt_checkin);
+    
+    UPDATE Hospedagem
+    SET valor_total_hosp = v_dias * v_preco_diaria
+    WHERE hospedagem_id = p_hospedagem_id;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE RegistrarCheckout(IN p_hospedagem_id INT, IN p_data_checkout DATE)
+BEGIN
+    UPDATE Hospedagem
+    SET dt_checkout = p_data_checkout, status_hosp = 'finalizada'
+    WHERE hospedagem_id = p_hospedagem_id;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE FUNCTION TotalHospedagensHotel(p_hotel_id INT)
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE total_hospedagens INT;
+    SELECT COUNT(hs.hospedagem_id)
+    INTO total_hospedagens
+    FROM Hospedagem hs
+    JOIN Quarto q ON hs.quarto_id = q.quarto_id
+    WHERE q.hotel_id = p_hotel_id;
+    RETURN total_hospedagens;
+END //
+
+DELIMITER ;
+
+
+DELIMITER //
+
+CREATE FUNCTION ValorMedioDiariasHotel(p_hotel_id INT)
+RETURNS DECIMAL(10, 2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE media_diarias DECIMAL(10, 2);
+    SELECT AVG(preco_diaria)
+    INTO media_diarias
+    FROM Quarto
+    WHERE hotel_id = p_hotel_id;
+    RETURN media_diarias;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE FUNCTION VerificarDisponibilidadeQuarto(p_quarto_id INT, p_data DATE)
+RETURNS BOOLEAN
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE disponibilidade BOOLEAN;
+    DECLARE total_reservas INT;
+    
+    SELECT COUNT(*)
+    INTO total_reservas
+    FROM Hospedagem
+    WHERE quarto_id = p_quarto_id
+    AND p_data BETWEEN dt_checkin AND dt_checkout;
+    
+    SET disponibilidade = (total_reservas = 0);
+    
+    RETURN disponibilidade;
+END //
+
+DELIMITER ;
+
+DELIMITER //
+
+CREATE TRIGGER AntesDeInserirHospedagem
+BEFORE INSERT ON Hospedagem
+FOR EACH ROW
+BEGIN
+    DECLARE quarto_disponivel BOOLEAN;
+    SET quarto_disponivel = VerificarDisponibilidadeQuarto(NEW.quarto_id, NEW.dt_checkin);
+    IF NOT quarto_disponivel THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'O quarto não está disponível na data de check-in.';
+    END IF;
+END //
+
+DELIMITER ;
+
+CREATE TABLE LogExclusoes (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT,
+    data_exclusao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER //
+
+CREATE TRIGGER AposDeletarCliente
+AFTER DELETE ON Cliente
+FOR EACH ROW
+BEGIN
+    INSERT INTO LogExclusoes (cliente_id) VALUES (OLD.cliente_id);
+END //
+
+DELIMITER ;
+
+
