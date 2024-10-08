@@ -34,7 +34,7 @@ dt_checkout (DATE): Data de check-out da hospedagem (não nula). \
 Valor_total_hosp(FLOAT, não nulo): Custo total da hospedagem, calculado quando a hospedagem é finalizada. \
 status_hosp (VARCHAR, não nulo): status_hosp da hospedagem, podendo receber os seguintes valores: “reserva”, reservado pelo cliente; “finalizada”, hospedagem concluida; “hospedado”, o cliente está atualmente hospedado no hotel; “cancelada”, a hospedagem (reserva) foi cancelada. \
 
-Para esta atividade mapa você deve criar código SQL, usando MySQL ou PostgreSQL: \
+Para esta atividade mapa você deve criar código SQL, usando MySQL ou PostgreSQL: 
 1. Crie o esquema de banco de dados para o sistema de gerenciamento e hospedagens hoteleiras nomeado “hospedar_db”. \
 
 2. Crie as tabelas "Hotel", "Quarto", "Cliente" e "Hospedagem" com as colunas especificadas anteriormente. \
