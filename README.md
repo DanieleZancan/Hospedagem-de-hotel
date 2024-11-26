@@ -1,7 +1,5 @@
 # Hospedagem-de-hotel
 
-Atividade MAPA da matéria Banco de Dados II do curso de Graduação de Engenharia de Software (finalizado na data de 30/06/2024)
-
 Criação de um sistema utilizando o banco de dados relacional MySQL para a criação de tabelas, inserção de dados e consultas dos dados dos clientes e registros, seguindo os seguintes critérios e instruções:
 
 Você foi contratado para criar um sistema de gerenciamento de hospedagens hoteleiras. O sistema deve ser capaz de armazenar informações sobre hotéis, quartos, clientes e hospedagens. Os clientes podem se hospedar em quartos de hotéis diferentes, e é importante manter um registro das reservas/hospedagens.
